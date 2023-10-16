@@ -7,12 +7,15 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import todolist.utils.Utils;
 
 @RestController
 @RequestMapping("/tasks")
@@ -42,7 +45,17 @@ public class TaskController {
   @GetMapping("/")
   public List<TaskModel> list(HttpServletRequest request) {
     var idUser = request.getAttribute("idUser");
-    var tasks = this.taskRepository.findByIdUser((UUID)idUser);
+    var tasks = this.taskRepository.findByIdUser((UUID) idUser);
     return tasks;
+  }
+
+  @PutMapping("/{id}")
+  public TaskModel update(@RequestBody TaskModel taskModel, HttpServletRequest request, @PathVariable UUID id) {
+
+    var task = this.taskRepository.findById(id).orElse(null);
+
+    Utils.copyNonNullProperties(taskModel, task);
+
+    return this.taskRepository.save(task);
   }
 }
